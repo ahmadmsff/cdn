@@ -1,0 +1,65 @@
+private static Random random = new Random();
+public static string RandomString(int length)
+{
+    const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    return new string(Enumerable.Repeat(chars, length)
+      .Select(s => s[random.Next(s.Length)]).ToArray());
+}
+
+private String rawJSON() {
+    try {
+        String json = "";
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("OrderID", "12345");
+        jsonObject.put("MenuID", "54321");
+        jsonObject.put("status", "Delivered");
+        json = jsonObject.toString();
+        return json;
+    } catch (Exception e) {
+        return "aaa";
+    }
+}
+
+public HttpResponseMessage Put(int id, [FromBody]barang barang)
+      {
+          try
+          {
+              using (apiEntities api = new apiEntities())
+              {
+                  var entity = api.barangs.FirstOrDefault(e => e.id_barang == id);
+                  if (entity != null)
+                  {
+                      entity.nama_barang = barang.nama_barang;
+                      entity.harga = barang.harga;
+                      api.SaveChanges();
+
+                      var javaScriptSerializer = new JavaScriptSerializer();
+                      Helper.Status status = new Helper.Status() { status = "Success" };
+                      var result = javaScriptSerializer.Serialize(status);
+                      return new HttpResponseMessage()
+                      {
+                          Content = new StringContent(result, System.Text.Encoding.UTF8, "application/json")
+                      };
+                  }
+                  else
+                  {
+                      var javaScriptSerializer = new JavaScriptSerializer();
+                      Helper.Status status = new Helper.Status() { status = "Not Found" };
+                      var result = javaScriptSerializer.Serialize(status);
+                      return new HttpResponseMessage()
+                      {
+                          Content = new StringContent(result, System.Text.Encoding.UTF8, "application/json")
+                      };
+                  }
+
+              }
+          } catch (Exception e)
+          {
+              var javaScriptSerializer = new JavaScriptSerializer();
+              Helper.Status status = new Helper.Status() { status = "Error" };
+              var result = javaScriptSerializer.Serialize(status);
+              return new HttpResponseMessage()
+              {
+                  Content = new StringContent(result, System.Text.Encoding.UTF8, "application/json")
+              };
+          }
